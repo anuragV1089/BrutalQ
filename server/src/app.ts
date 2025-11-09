@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 import express, { Express, Request, Response } from "express";
 import session from "express-session";
 import postRouter from "./routes/postRouter";
@@ -34,7 +34,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "development" ? false : true,
+      secure: false,
       maxAge: 1000 * 60 * 60 * 24,
     },
   })

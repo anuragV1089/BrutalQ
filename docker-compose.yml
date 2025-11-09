@@ -44,11 +44,11 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: "/api"
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:80"
-    environment:
-      VITE_BACKEND_URL: /api
     depends_on:
       - backend
 
