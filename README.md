@@ -1,4 +1,4 @@
-# [Your Project Name]
+# [BrutalQ]
 
 > A full-stack application with a React frontend, Node.js backend, and PostgreSQL database. The entire app is containerized with Docker and runs with a single command.
 
