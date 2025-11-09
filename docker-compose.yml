@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+    volumes:
+      - ./docker/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./docker/02-seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # load from root .env or override in environment
+      POSTGRES_URL: ${POSTGRES_URL}
+      SESSION_SECRET: ${SESSION_SECRET:-supersecret}
+      PORT: ${BACKEND_PORT:-4000}
+      CLIENT_SIDE_URL: ${CLIENT_SIDE_URL}
+      NODE_ENV: development
+    ports:
+      - "${PORT:-4000}:4000"
+    # optional: mount for development
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      VITE_BACKEND_URL: /api
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
